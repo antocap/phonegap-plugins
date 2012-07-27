@@ -7,9 +7,9 @@
 
 #import "TwitterPlugin.h"
 #ifdef PHONEGAP_FRAMEWORK
-    #import <PhoneGap/JSON.h>
+    #import <PhoneGap/JSONKit.h>
 #else
-    #import "JSON.h"
+    #import "JSONKit.h"
 #endif
 
 #define TWITTER_URL @"http://api.twitter.com/1/"
@@ -36,18 +36,24 @@
     [super writeJavascript:[[PluginResult resultWithStatus:PGCommandStatus_OK messageAsInt:canTweet ? 1 : 0] toSuccessCallbackString:callbackId]];
 }
 
-- (void) sendTweet:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options{
+- (void) composeTweet:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options{
     // arguments: callback, tweet text, url attachment, image attachment
     NSString *callbackId = [arguments objectAtIndex:0];
-    NSString *tweetText = [arguments objectAtIndex:1];
-    NSString *urlAttach = [arguments objectAtIndex:2];
-    NSString *imageAttach = [arguments objectAtIndex:3];
+    NSString *tweetText = [options objectForKey:@"text"];
+    NSString *urlAttach = [options objectForKey:@"urlAttach"];
+    NSString *imageAttach = [options objectForKey:@"imageAttach"];
     
     TWTweetComposeViewController *tweetViewController = [[TWTweetComposeViewController alloc] init];
-    [tweetViewController setInitialText:tweetText];
     
     BOOL ok = YES;
     NSString *errorMessage;
+    
+    if(tweetText != nil){
+        ok = [tweetViewController setInitialText:tweetText];
+        if(!ok){
+            errorMessage = @"Tweet is too long";
+        }
+    }
     
     if(urlAttach != nil){
         ok = [tweetViewController addURL:[NSURL URLWithString:urlAttach]];
@@ -58,8 +64,14 @@
     
     if(imageAttach != nil){
         // Note that the image is loaded syncronously
-        UIImage *img = [[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imageAttach]]];
-        ok = [tweetViewController addImage:img];
+        if([imageAttach hasPrefix:@"http://"]){
+            UIImage *img = [[UIImage alloc] initWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:imageAttach]]];
+            ok = [tweetViewController addImage:img];
+            [img release];
+        }
+        else{
+            ok = [tweetViewController addImage:[UIImage imageNamed:imageAttach]];
+        }
         if(!ok){
             errorMessage = @"Image could not be added";
         }
@@ -93,39 +105,27 @@
     [tweetViewController release];
 }
 
-- (void) composeTweet:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options{
-  TWTweetComposeViewController *tweetComposeViewController =
-    [[TWTweetComposeViewController alloc] init];
-  [tweetComposeViewController setCompletionHandler:
-    ^(TWTweetComposeViewControllerResult result) {
-    [[ super appViewController ] dismissModalViewControllerAnimated:YES];
-  }];
-
-  [[ super appViewController ] presentModalViewController:tweetComposeViewController animated:YES];
-}
-
 - (void) getPublicTimeline:(NSMutableArray*)arguments withDict:(NSMutableDictionary*)options{
     NSString *callbackId = [arguments objectAtIndex:0];
     NSString *url = [NSString stringWithFormat:@"%@statuses/public_timeline.json", TWITTER_URL];
     
-	TWRequest *postRequest = [[TWRequest alloc] initWithURL:[NSURL URLWithString:url] parameters:nil requestMethod:TWRequestMethodGET];
+    TWRequest *postRequest = [[TWRequest alloc] initWithURL:[NSURL URLWithString:url] parameters:nil requestMethod:TWRequestMethodGET];
     [postRequest performRequestWithHandler:^(NSData *responseData, NSHTTPURLResponse *urlResponse, NSError *error) {
         NSString *jsResponse;
         
-		if([urlResponse statusCode] == 200) {
-
+        if([urlResponse statusCode] == 200) {
             NSString *dataString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
-            NSDictionary *dict = [dataString JSONValue];
+            NSDictionary *dict = [dataString objectFromJSONString];
             jsResponse = [[PluginResult resultWithStatus:PGCommandStatus_OK messageAsDictionary:dict] toSuccessCallbackString:callbackId];
             [dataString release];
 		}
 		else{
             jsResponse = [[PluginResult resultWithStatus:PGCommandStatus_ERROR 
                                         messageAsString:[NSString stringWithFormat:@"HTTP Error: %i", [urlResponse statusCode]]] 
-                          toErrorCallbackString:callbackId];
+                            	  toErrorCallbackString:callbackId];
 		}
         
-        [self performCallbackOnMainThreadforJS:jsResponse];        
+		[self performCallbackOnMainThreadforJS:jsResponse];        
 	}];
     
     [postRequest release];
@@ -149,7 +149,7 @@
                     NSString *jsResponse;
                     if([urlResponse statusCode] == 200) {
                         NSString *dataString = [[NSString alloc] initWithData:responseData encoding:NSUTF8StringEncoding];
-                        NSDictionary *dict = [dataString JSONValue];
+                        NSDictionary *dict = [dataString objectFromJSONString];
                         jsResponse = [[PluginResult resultWithStatus:PGCommandStatus_OK messageAsDictionary:dict] toSuccessCallbackString:callbackId];
                         [dataString release];
                     }

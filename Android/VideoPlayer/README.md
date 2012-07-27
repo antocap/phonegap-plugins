@@ -6,7 +6,7 @@ This command fires an Intent to have your devices video player show the video.
 
 ## Adding the Plugin to your project ##
 
-Using this plugin requires [Android PhoneGap](http://github.com/phonegap/phonegap-android).
+Using this plugin requires [Android PhoneGap](https://github.com/apache/incubator-cordova-android).
 
 1. To install the plugin, move www/video to your project's www folder and include a reference to it in your html file after phonegap.js.
 
@@ -21,7 +21,7 @@ Using this plugin requires [Android PhoneGap](http://github.com/phonegap/phonega
 
 ## Using the plugin ##
 
-The plugin creates the object `window.plugins.video`.  To use, call the play() method:
+The plugin creates the object `window.plugins.videoPlayer`.  To use, call the play() method:
 
 <pre>
   /**
@@ -36,8 +36,9 @@ Sample use:
 
     window.plugins.videoPlayer.play("http://path.to.my/video.mp4");
     window.plugins.videoPlayer.play("file:///path/to/my/video.mp4");
+    window.plugins.videoPlayer.play("file:///android_asset/www/path/to/my/video.mp4");
 
-Note: You cannot play a video from the assets folder on Android.
+Note: When playing video from the assets folder, the video is first copied to internal storage with MODE_WORLD_READABLE.
 
 ## RELEASE NOTES ##
 
