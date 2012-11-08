@@ -24,7 +24,6 @@ import org.json.JSONException;
 
 import android.util.Log;
 
-import com.phonegap.api.PhonegapActivity;
 import com.phonegap.api.Plugin;
 import com.phonegap.api.PluginResult;
 

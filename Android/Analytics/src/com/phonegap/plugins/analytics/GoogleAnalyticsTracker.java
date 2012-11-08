@@ -19,8 +19,7 @@ import com.phonegap.api.PluginResult.Status;
 public class GoogleAnalyticsTracker extends Plugin {
 	public static final String START = "start";
 	public static final String TRACK_PAGE_VIEW = "trackPageView";
-	public static final String TRACK_EVENT = "trackEvent";
-	public static final String SET_CUSTOM_VARIABLE = "setCustomVariable";
+    public static final String TRACK_EVENT = "trackEvent";
     
 	public static final int DISPATCH_INTERVAL = 20;
 	private com.google.android.apps.analytics.GoogleAnalyticsTracker tracker;
@@ -53,12 +52,6 @@ public class GoogleAnalyticsTracker extends Plugin {
 			} catch (JSONException e) {
 				result = new PluginResult(Status.JSON_EXCEPTION);
 			}
-		} else if (SET_CUSTOM_VARIABLE.equals(action)){
-			try {
-				setCustomVar(data.getInt(0), data.getString(1), data.getString(2), data.getInt(3));
-			} catch (JSONException e) {
-				result = new PluginResult(Status.JSON_EXCEPTION);
-			}
 		} else {
 			result = new PluginResult(Status.INVALID_ACTION);
 		}		
@@ -75,9 +68,5 @@ public class GoogleAnalyticsTracker extends Plugin {
 
 	private void trackEvent(String category, String action, String label, int value){
 		tracker.trackEvent(category, action, label, value);
-	}
-
-	private void setCustomVar(int index, String label, String value, int scope) {
-		tracker.setCustomVar(index, label, value, scope);
 	}
 }

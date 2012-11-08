@@ -18,13 +18,17 @@
 			lat: 49.281468,
 			lon: -123.104446
 		};
-	}
+	};
 
 	MapKit.prototype = {
 
 		onMapCallback: function(pindex) {
 			alert('You selected pin : ' + pindex);
 		},
+
+        onPinDragCallback: function(){
+            alert("You selected pin : " + pindex + " with lat: " + latitude + " and long: " + longitude);
+        },
 
 		showMap: function() {
 			cordovaRef.exec('MapKitView.showMap');
@@ -55,13 +59,21 @@
 			cordovaRef.exec('MapKitView.addMapPins', pinStr);
 		},
 
+        zoomToFitMapAnnotations: function(){
+            cordovaRef.exec('MapKitView.zoomToFitMapAnnotations');
+        },
+
 		clearMapPins: function() {
 			cordovaRef.exec('MapKitView.clearMapPins');
 		},
 
 		hideMap: function() {
 			cordovaRef.exec('MapKitView.hideMap', {});
-		}
+		},
+
+        zoomToPins: function(){
+            cordovaRef.exec('MapKitView.zoomToPins');
+        }
 
 	};
 
