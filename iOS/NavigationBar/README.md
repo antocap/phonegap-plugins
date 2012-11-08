@@ -18,7 +18,7 @@ Installing the plugin
 
 - Copy *.xib, *.m and *.h files to your project's "Plugins" folder (should already exist and contain a README file if you used the Cordova project template)
 - They have to be added to the project as well, so drag them from the "Plugins" folder (in Finder) to the same folder (in Xcode) and select to create references
-- Open "Supporting Files/Cordova.plist" and under "Plugins", add a key with the plugin name "NavigationBar" and a string value of "NavigationBar" (I guess it's the plugin's main class name)
+- Open "Resources/Cordova.plist" and under "Plugins", add a key with the plugin name "NavigationBar" and a string value of "NavigationBar" (I guess it's the plugin's main class name)
 
 Note regarding orientation changes and the tab bar plugin
 ---------------------------------------------------------
@@ -57,7 +57,12 @@ This example shows how to use the navigation bar:
 
         plugins.navigationBar.init()
 
-        plugins.navigationBar.create() // or .create("BlackOpaque") to apply a certain style
+        plugins.navigationBar.create()
+        // or to apply a certain style (one of "Black", "BlackOpaque", "BlackTranslucent", "Default"):
+        plugins.navigationBar.create("BlackOpaque")
+        // or with a yellow tint color (note: parameters might be changed to one object in a later version)
+        plugins.navigationBar.create('BlackOpaque', {tintColorRgba: '255,255,0,255'})
+
         plugins.navigationBar.hideLeftButton()
         plugins.navigationBar.hideRightButton()
 
@@ -91,7 +96,7 @@ There are [several ways](http://stackoverflow.com/questions/227078/creating-a-le
 
 ![Screenshot](http://i.imgur.com/naC96.png)
 
-The above screenshot has a navigation bar with two such custom buttons. The left one actually has a background image very similar to the black iOS navigation bar. A stretchable picture (such as [this](http://imgur.com/yibWD) or [that one](http://imgur.com/K2LUS) which were used above) should be used because the plugin automatically sets the button size according to the text size (but not smaller than the original picture). You can define left/right margins which shall not be stretched if the button width changes.
+The above screenshot has a navigation bar with two such custom buttons. The left one actually has a background image very similar to the black iOS navigation bar. A stretchable picture (such as [this](http://imgur.com/yibWD) or [that one](http://imgur.com/K2LUS) which were used above) should be used because the plugin automatically sets the button size according to the text size (but not smaller than the original picture). You can define left/right margins which shall not be stretched if the button width changes. Important: iOS 5.0 supports defining two different values for the left/right margins. In earlier iOS versions, the plugins takes the larger value (13 pixels in the example below), so please test if your background image looks fine with older versions (install and use the iPhone 4.3 simulator, for example).
 
 Note: Vertical margins are supported by iOS but not implemented in the plugin – tell me if you would like that feature. I think you should keep navigation bar buttons at a fixed height (30px on normal 320x480 iPhone display).
 
